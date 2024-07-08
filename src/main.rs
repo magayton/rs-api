@@ -1,4 +1,5 @@
 use proto::calculator_server::{Calculator, CalculatorServer};
+use tonic::transport::Server;
 
 mod proto {
     tonic::include_proto!("calculator");
@@ -25,6 +26,17 @@ impl Calculator for CalculatorService {
     }
 }
 
-fn main() {
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "[::1]:50051".parse()?;
+    let calculator_service = CalculatorService::default();
+
+    println!("Starting server at {}", addr);
+
+    Server::builder()
+        .add_service(CalculatorServer::new(calculator_service))
+        .serve(addr)
+        .await?;
+
+    Ok(())
 }
